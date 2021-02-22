@@ -5,7 +5,7 @@ author: paolosalvatori
 
 # Create an Azure Kubernetes Service cluster with the Application Gateway Ingress Controller #
 
-This ARM template can be used to deploy a public or private [Azure Kubernetes Cluster (AKS) cluster](https://docs.microsoft.com/en-us/azure/aks/intro-kubernetes) with an [Azure Application Gateway](https://docs.microsoft.com/en-us/azure/application-gateway/overview) and  [Application Gateway Ingress Controller](https://docs.microsoft.com/en-us/azure/application-gateway/ingress-controller-overview)add-on. The template allows to deploy a rich set of AKS features such as:
+This ARM template can be used to deploy a public or private [Azure Kubernetes Cluster (AKS) cluster](https://docs.microsoft.com/en-us/azure/aks/intro-kubernetes) with an [Azure Application Gateway](https://docs.microsoft.com/en-us/azure/application-gateway/overview) and  [Application Gateway Ingress Controller](https://docs.microsoft.com/en-us/azure/application-gateway/ingress-controller-overview) add-on. The template allows to deploy a rich set of AKS features such as:
 
 - [AKS-managed AAD integration](https://docs.microsoft.com/en-us/azure/aks/managed-aad)
 - [Azure RBAC for Kubernetes Authorization](https://docs.microsoft.com/en-us/azure/aks/manage-azure-rbac)
@@ -14,6 +14,8 @@ This ARM template can be used to deploy a public or private [Azure Kubernetes Cl
 - [Azure Network Policies](https://docs.microsoft.com/en-us/azure/aks/use-network-policies)
 - [Azure Monitor for containers add-on](https://docs.microsoft.com/en-us/azure/azure-monitor/containers/container-insights-enable-new-cluster)
 - [Application Gateway Ingress Controller add-on](https://azure.github.io/application-gateway-kubernetes-ingress/)
+
+**Please report any issue you may find using the template, thanks!**
 
 ## Architecture ##
 
