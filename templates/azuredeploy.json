@@ -967,7 +967,7 @@
     "contributorRoleAssignmentName": "[guid(concat(resourceGroup().id, 'contributorRoleAssignment'))]",
     "contributorRoleAssignmentId": "[resourceId('Microsoft.Authorization/roleAssignments', variables('contributorRoleAssignmentName'))]",
     "acrPullRoleId": "[concat(subscription().Id, '/providers/Microsoft.Authorization/roleDefinitions/', variables('acrPullRoleDefinitionName'))]",
-    "acrPullRoleAssignmentName": "[guid(concat(resourceGroup().id, 'acrPullRoleAssignment'))]",
+    "acrPullRoleAssignmentName": "[concat('Microsoft.Authorization/', guid(resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName')), variables('acrPullRoleId')))]",
     "containerInsightsSolutionName": "[concat('ContainerInsights(', parameters('logAnalyticsWorkspaceName'), ')')]",
     "acrPublicDNSZoneForwarder": "[if(equals(toLower(environment().name), 'azureusgovernment'), 'azurecr.us', 'azurecr.io')]",
     "acrPrivateDnsZoneName": "[concat('privatelink.', variables('acrPublicDNSZoneForwarder'))]",
@@ -1496,8 +1496,7 @@
       },
       "resources": [
         {
-          "condition": "[equals(parameters('acrSku'), 'Premium')]",
-          "type": "Microsoft.Authorization/roleAssignments",
+          "type": "providers/roleAssignments",
           "apiVersion": "2020-04-01-preview",
           "name": "[variables('acrPullRoleAssignmentName')]",
           "dependsOn": [
@@ -1506,11 +1505,12 @@
           ],
           "properties": {
             "roleDefinitionId": "[variables('acrPullRoleId')]",
-            "principalId": "[reference(variables('aksClusterId'), '2020-12-01', 'Full').properties.identityProfile.kubeletidentity.clientId]",
+            "principalId": "[reference(variables('aksClusterId'), '2020-12-01', 'Full').properties.identityProfile.kubeletidentity.objectId]",
             "principalType": "ServicePrincipal"
           }
         },
         {
+          "condition": "[equals(parameters('acrSku'), 'Premium')]",
           "type": "replications",
           "apiVersion": "2019-05-01",
           "name": "[parameters('acrGeoReplicationLocation')]",
