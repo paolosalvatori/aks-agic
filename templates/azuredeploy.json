@@ -63,14 +63,14 @@
       }
     },
     "aksClusterServiceCidr": {
-      "defaultValue": "10.3.0.0/16",
+      "defaultValue": "10.4.0.0/16",
       "type": "string",
       "metadata": {
         "description": "A CIDR notation IP range from which to assign service cluster IPs. It must not overlap with any Subnet IP ranges."
       }
     },
     "aksClusterDnsServiceIP": {
-      "defaultValue": "10.3.0.10",
+      "defaultValue": "10.4.0.10",
       "type": "string",
       "metadata": {
         "description": "Specifies the IP address assigned to the Kubernetes DNS service. It must be within the Kubernetes service address range specified in serviceCidr."
@@ -152,7 +152,7 @@
       }
     },
     "aksClusterEnablePrivateCluster": {
-      "defaultValue": false,
+      "defaultValue": true,
       "type": "bool",
       "metadata": {
         "description": "Specifies whether to create the cluster as a private cluster or not."
@@ -834,9 +834,27 @@
         "description": "The default action of allow or deny when no other rules match. Allowed values: Allow or Deny"
       }
     },
+    "applicationGatewayName": {
+      "type": "string",
+      "defaultValue": "[concat('appgw-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Specifies the name of the Application Gateway."
+      }
+    },
+    "applicationGatewayZones": {
+      "type": "array",
+      "defaultValue": [
+        "1",
+        "2",
+        "3"
+      ],
+      "metadata": {
+        "description": "Specifies the availability zones of the Application Gateway."
+      }
+    },
     "wafPolicyName": {
       "type": "String",
-      "defaultValue": "[concat('waf-', uniqueString(resourceGroup().id))]",
+      "defaultValue": "[concat(parameters('applicationGatewayName'), 'WafPolicy')]",
       "metadata": {
         "description": "Specifies the name of the WAF policy"
       }
@@ -897,27 +915,11 @@
       "metadata": {
         "description": "Specifies the rule set version."
       }
-    },
-    "applicationGatewayName": {
-      "type": "string",
-      "defaultValue": "[concat('appgw-', uniqueString(resourceGroup().id))]",
-      "metadata": {
-        "description": "Specifies the name of the Application Gateway."
-      }
-    },
-    "applicationGatewayZones": {
-      "type": "array",
-      "defaultValue": [
-        "1",
-        "2",
-        "3"
-      ],
-      "metadata": {
-        "description": "Specifies the availability zones of the Application Gateway."
-      }
     }
   },
   "variables": {
+    "readerRoleDefinitionName": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+    "contributorRoleDefinitionName": "b24988ac-6180-42a0-ab88-20f7382dd24c",
     "acrPullRoleDefinitionName": "7f951dda-4ed3-4680-a7ca-43fe172d538d",
     "aksClusterUserDefinedManagedIdentityName": "[concat(parameters('aksClusterName'), 'ManagedIdentity')]",
     "aksClusterUserDefinedManagedIdentityId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities',variables('aksClusterUserDefinedManagedIdentityName'))]",
@@ -962,12 +964,13 @@
     "bastionSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('bastionSubnetName'))]",
     "bastionHostId": "[resourceId('Microsoft.Network/bastionHosts', parameters('bastionHostName'))]",
     "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('logAnalyticsWorkspaceName'))]",
-    "readerRoleId": "[concat(subscription().Id, '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-    "contributorRoleId": "[concat(subscription().Id, '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c')]",
-    "contributorRoleAssignmentName": "[guid(concat(resourceGroup().id, 'contributorRoleAssignment'))]",
-    "contributorRoleAssignmentId": "[resourceId('Microsoft.Authorization/roleAssignments', variables('contributorRoleAssignmentName'))]",
+    "readerRoleId": "[concat(subscription().Id, '/providers/Microsoft.Authorization/roleDefinitions/', variables('readerRoleDefinitionName'))]",
+    "contributorRoleId": "[concat(subscription().Id, '/providers/Microsoft.Authorization/roleDefinitions/', variables('contributorRoleDefinitionName'))]",
     "acrPullRoleId": "[concat(subscription().Id, '/providers/Microsoft.Authorization/roleDefinitions/', variables('acrPullRoleDefinitionName'))]",
-    "acrPullRoleAssignmentName": "[concat('Microsoft.Authorization/', guid(resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName')), variables('acrPullRoleId')))]",
+    "aksContributorRoleAssignmentName": "[guid(concat(resourceGroup().id, variables('aksClusterUserDefinedManagedIdentityName'),'ContributorRoleAssignment'))]",
+    "aksContributorRoleAssignmentId": "[resourceId('Microsoft.Authorization/roleAssignments', variables('aksContributorRoleAssignmentName'))]",
+    "appGwContributorRoleAssignmentName": "[guid(concat(resourceGroup().id, variables('applicationGatewayUserDefinedManagedIdentityName'),'ContributorRoleAssignment'))]",
+    "acrPullRoleAssignmentName": "[concat('Microsoft.Authorization/', guid(concat(resourceGroup().id, 'acrPullRoleAssignment')))]",
     "containerInsightsSolutionName": "[concat('ContainerInsights(', parameters('logAnalyticsWorkspaceName'), ')')]",
     "acrPublicDNSZoneForwarder": "[if(equals(toLower(environment().name), 'azureusgovernment'), 'azurecr.us', 'azurecr.io')]",
     "acrPrivateDnsZoneName": "[concat('privatelink.', variables('acrPublicDNSZoneForwarder'))]",
@@ -1339,7 +1342,7 @@
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-04-01-preview",
-      "name": "[variables('contributorRoleAssignmentName')]",
+      "name": "[variables('aksContributorRoleAssignmentName')]",
       "dependsOn": [
         "[variables('aksClusterUserDefinedManagedIdentityId')]",
         "[variables('virtualNetworkId')]"
@@ -1435,7 +1438,7 @@
         },
         {
           "type": "providers/roleAssignments",
-          "apiVersion": "2018-09-01-preview",
+          "apiVersion": "2020-04-01-preview",
           "name": "[concat('Microsoft.Authorization/', guid(concat(resourceGroup().id), variables('readerRoleId')))]",
           "dependsOn": [
             "[variables('keyVaultId')]",
@@ -1570,7 +1573,7 @@
         "[variables('keyVaultPrivateDnsZoneGroupId')]",
         "[variables('acrPrivateDnsZoneGroupId')]",
         "[variables('applicationGatewayId')]",
-        "[variables('contributorRoleAssignmentId')]"
+        "[variables('aksContributorRoleAssignmentId')]"
       ],
       "properties": {
         "kubernetesVersion": "[parameters('aksClusterKubernetesVersion')]",
@@ -2315,6 +2318,21 @@
           }
         }
       ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[variables('appGwContributorRoleAssignmentName')]",
+      "dependsOn": [
+        "[variables('aksClusterId')]",
+        "[variables('applicationGatewayId')]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('contributorRoleId')]",
+        "principalId": "[reference(variables('aksClusterId'), '2020-12-01', 'Full').properties.addonProfiles.ingressApplicationGateway.identity.objectId]",
+        "principalType": "ServicePrincipal",
+        "scope": "[resourceGroup().id]"
+      }
     }
   ],
   "outputs": {
