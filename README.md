@@ -15,7 +15,7 @@ This ARM template can be used to deploy a public or private [Azure Kubernetes Cl
 - [Azure Monitor for containers add-on](https://docs.microsoft.com/en-us/azure/azure-monitor/containers/container-insights-enable-new-cluster)
 - [Application Gateway Ingress Controller add-on](https://azure.github.io/application-gateway-kubernetes-ingress/)
 
-**Please report any issue you may find using the template, thanks!**
+**Please report any issue you eventually find using the template, thanks!**
 
 ## Architecture ##
 
@@ -109,7 +109,7 @@ You can configure Application Gateway to store diagnostic logs and metrics to Lo
 
 ## Visio ##
 
-In the **visio** folder you can find the Visio document which contains the above diagrams.
+In the **visio** folder you can find the Visio document which contains the architecture diagram.
 
 ## References ##
 
