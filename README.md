@@ -162,7 +162,7 @@ You can configure Application Gateway to store diagnostic logs and metrics to Lo
 
 ## Visio ##
 
-In the **visio** folder you can find the Visio document which contains the architecture diagram.
+The [Visio](https://github.com/paolosalvatori/aks-agic/blob/master/visio/aks.vsdx?raw=true) document contains the architecture diagram.
 
 ## References ##
 
