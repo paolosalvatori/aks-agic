@@ -118,7 +118,7 @@
     },
     "aksClusterKubernetesVersion": {
       "type": "string",
-      "defaultValue": "1.18.8",
+      "defaultValue": "1.20.2",
       "metadata": {
         "description": "Specifies the version of Kubernetes specified when creating the managed cluster."
       }
@@ -294,7 +294,7 @@
       }
     },
     "userNodePoolName": {
-      "defaultValue": "nodepool1",
+      "defaultValue": "nodepool2",
       "type": "string",
       "metadata": {
         "description": "Specifies the unique name of of the user node pool profile in the context of the subscription and resource group."
@@ -717,7 +717,7 @@
     },
     "acrName": {
       "type": "string",
-      "defaultValue": "[concat('acr-', uniqueString(resourceGroup().id))]",
+      "defaultValue": "[concat('acr', uniqueString(resourceGroup().id))]",
       "minLength": 5,
       "maxLength": 50,
       "metadata": {

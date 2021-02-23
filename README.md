@@ -60,13 +60,19 @@ The ARM template deploys:
 
 ## Deployment ##
 
-You can use the **deploy.sh** Bash script to deploy the topology. The following picture shows the resources deployed by the ARM template in the target resource group.
+You can use the [deploy.sh](https://raw.githubusercontent.com/paolosalvatori/aks-agic/master/scripts/deploy.sh) Bash script to deploy the topology. The following picture shows the resources deployed by the ARM template in the target resource group.
 
 ![Resource Group](images/resourcegroup.png)
 
 The following picture shows the resources deployed by the ARM template in the MC resource group associated to the AKS cluster:
 
 ![MC Resource Group](images/mc_resourcegroup.png)
+
+**NOTE**: if you deploy the ARM template without using the companion [deploy.sh](https://raw.githubusercontent.com/paolosalvatori/aks-agic/master/scripts/deploy.sh), make sure to properly install the necessary preview features (for more information, see the script) and specify a value fo the following parameters:
+
+- **aksClusterKubernetesVersion**: The latest version of Kubernetes available in your region
+- **aadProfileAdminGroupObjectIDs**: an array containing the objectId of one or more Azure Active Directory groups for cluster administrator users
+- **vmAdminPasswordOrKey**: the key or password for the jumpbox virtual machine
 
 ## Application Gateway ##
 
@@ -90,7 +96,6 @@ Azure Application Gateway is a web traffic load balancer that enables customers 
 
 For more information, see [How an Application Gateway works](https://docs.microsoft.com/en-us/azure/application-gateway/how-application-gateway-works).
 
-
 ## Web Access Firewall Policy for Application Gateway ##
 
 [Web Application Firewall (WAF)](https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/ag-overview) is a service that provides centralized protection of web applications from common exploits and vulnerabilities. WAF is based on rules from the [OWASP (Open Web Application Security Project) core rule sets](https://owasp.org/www-project-modsecurity-core-rule-set/). WAF also provide the ability to create custom rules that are evaluated for each request that passes through the WAF. These rules hold a higher priority than the rest of the rules in the managed rule sets. The custom rules contain a rule name, rule priority, and an array of matching conditions. If these conditions are met, an action is taken (to allow or block). Web applications can be the target of malicious attacks that exploit common, known vulnerabilities that include SQL injection attacks, DDOS attacks, and cross site scripting attacks. Preventing such attacks in application code can be challenging and may require rigorous maintenance, patching and monitoring at many layers of the application topology. A centralized web application firewall helps make security management much simpler and gives better assurance to application administrators against threats or intrusions. A WAF solution can also react to a security threat faster by patching a known vulnerability at a central location versus securing each of individual web applications. Existing application gateways can be converted to a Web Application Firewall enabled application gateway very easily.
@@ -105,7 +110,55 @@ The Application Gateway WAF can be configured to run in the following two modes:
 - **Detection mode**: Monitors and logs all threat alerts. You turn on logging diagnostics for Application Gateway in the Diagnostics section. You must also make sure that the WAF log is selected and turned on. Web application firewall doesn't block incoming requests when it's operating in Detection mode.
 - **Prevention mode**: Blocks intrusions and attacks that the rules detect. The attacker receives a "403 unauthorized access" exception, and the connection is closed. Prevention mode records such attacks in the WAF logs.
 
-You can configure Application Gateway to store diagnostic logs and metrics to Log Analytics. In this case, also WAF logs will be stored in Log Analytics and they can be queries using Kusto Query Language.
+You can configure Application Gateway to store diagnostic logs and metrics to Log Analytics. In this case, also WAF logs will be stored in Log Analytics and they can be queries using Kusto Query Language. In the ARM template the WAF policy is configured in Prevention mode and contains a couple of sample custom rules that block incoming request, when the query string contains the word blockme or when the User-Agent header contain the string evilbot:
+
+```json
+{
+  "name": "BlockMe",
+  "priority": 1,
+  "ruleType": "MatchRule",
+  "action": "Block",
+  "matchConditions": [
+    {
+      "matchVariables": [
+        {
+          "variableName": "QueryString"
+        }
+      ],
+      "operator": "Contains",
+      "negationConditon": false,
+      "matchValues": [
+        "blockme"
+      ],
+      "transforms": []
+    }
+  ]
+},
+{
+  "name": "BlockEvilBot",
+  "priority": 2,
+  "ruleType": "MatchRule",
+  "action": "Block",
+  "matchConditions": [
+    {
+      "matchVariables": [
+        {
+          "variableName": "RequestHeaders",
+          "selector": "User-Agent"
+        }
+      ],
+      "operator": "Contains",
+      "negationConditon": false,
+      "matchValues": [
+        "evilbot"
+      ],
+      "transforms": [
+        "Lowercase"
+      ]
+    }
+  ]
+}
+```
 
 ## Visio ##
 
