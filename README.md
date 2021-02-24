@@ -15,7 +15,7 @@ This ARM template can be used to deploy a public or private [Azure Kubernetes Cl
 - [Azure Monitor for containers add-on](https://docs.microsoft.com/en-us/azure/azure-monitor/containers/container-insights-enable-new-cluster)
 - [Application Gateway Ingress Controller add-on](https://azure.github.io/application-gateway-kubernetes-ingress/)
 
-**Please report any issue you eventually find using the template, thanks!**
+For a sample on how to use the Application Gateway Ingress Controller in a multi-tenant AKS cluster, see this [sample](https://github.com/paolosalvatori/aks-multi-tenant-agic).
 
 ## Architecture ##
 
