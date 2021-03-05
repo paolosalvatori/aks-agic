@@ -78,6 +78,26 @@ The AGIC add-on is still deployed as a pod in the customer's AKS cluster, howeve
 
 ![setup](images/setup.png)
 
+As documented at [Enable multiple Namespace support in an AKS cluster with Application Gateway Ingress Controller](https://docs.microsoft.com/en-us/azure/application-gateway/ingress-controller-multiple-namespace-support), a single instance of the Azure Application Gateway Kubernetes Ingress Controller (AGIC) can ingest events from and observe multiple namespaces. Should the AKS administrator decide to use App Gateway as an ingress, all namespaces will use the same instance of Application Gateway. A single installation of Ingress Controller will monitor accessible namespaces and will configure the Application Gateway it is associated with.
+
+To enable multiple namespace support:
+
+- modify the helm-config.yaml file in one of the following ways:
+
+  - delete the `watchNamespace` key entirely from helm-config.yaml - AGIC will observe all namespaces
+  - set `watchNamespace` to an empty string - AGIC will observe all namespaces
+  - add multiple namespaces separated by a comma (`watchNamespace: default,secondNamespace`) - AGIC will observe these namespaces exclusively
+- apply Helm template changes with: `helm install -f helm-config.yaml application-gateway-kubernetes-ingress/ingress-azure`
+
+Once deployed with the ability to observe multiple namespaces, AGIC will:
+
+- list ingress resources from all accessible namespaces
+- filter to ingress resources annotated with kubernetes.io/ingress.class: azure/application-gateway
+- compose combined [Application Gateway config](https://github.com/Azure/azure-sdk-for-go/blob/37f3f4162dfce955ef5225ead57216cf8c1b2c70/services/network/mgmt/2016-06-01/network/models.go#L1710-L1744)
+- apply the config to the associated Application Gateway via [ARM](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/overview)
+
+## Limits ##
+
 [Azure subscription and service limits, quotas, and constraints](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits#networking-limits) documentation reports that the max number of:
 
 - Active Listeners
