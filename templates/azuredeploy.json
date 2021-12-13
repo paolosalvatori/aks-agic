@@ -63,14 +63,14 @@
       }
     },
     "aksClusterServiceCidr": {
-      "defaultValue": "10.4.0.0/16",
+      "defaultValue": "10.3.0.0/16",
       "type": "string",
       "metadata": {
         "description": "A CIDR notation IP range from which to assign service cluster IPs. It must not overlap with any Subnet IP ranges."
       }
     },
     "aksClusterDnsServiceIP": {
-      "defaultValue": "10.4.0.10",
+      "defaultValue": "10.3.0.10",
       "type": "string",
       "metadata": {
         "description": "Specifies the IP address assigned to the Kubernetes DNS service. It must be within the Kubernetes service address range specified in serviceCidr."
